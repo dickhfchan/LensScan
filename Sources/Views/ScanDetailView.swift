@@ -154,12 +154,6 @@ struct ScanDetailView: View {
                     Label("Rename", systemImage: "pencil")
                 }
 
-                Button {
-                    Task { await saveCurrentPage() }
-                } label: {
-                    Label("Save Image", systemImage: "square.and.arrow.down")
-                }
-
                 if let page = currentPage, (document?.pages.count ?? 0) > 1 {
                     Button(role: .destructive) {
                         store.deletePage(page.id, in: documentID)
@@ -168,15 +162,25 @@ struct ScanDetailView: View {
                         Label("Delete this page", systemImage: "trash")
                     }
                 }
-
-                Button(role: .destructive) {
-                    store.delete(documentID)
-                    dismiss()
-                } label: {
-                    Label("Delete scan", systemImage: "trash")
-                }
             } label: {
                 Image(systemName: "ellipsis.circle")
+            }
+        }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button {
+                Task { await saveCurrentPage() }
+            } label: {
+                Image(systemName: "square.and.arrow.down")
+            }
+        }
+
+        ToolbarItem(placement: .primaryAction) {
+            Button(role: .destructive) {
+                store.delete(documentID)
+                dismiss()
+            } label: {
+                Image(systemName: "trash")
             }
         }
     }
