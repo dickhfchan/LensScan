@@ -132,6 +132,12 @@ struct ScanDetailView: View {
                 }
 
                 Button {
+                    Task { await shareCurrentPageAsImage() }
+                } label: {
+                    Label("Share Image", systemImage: "photo")
+                }
+
+                Button {
                     showingText = true
                 } label: {
                     Label("View text", systemImage: "text.alignleft")
@@ -175,14 +181,6 @@ struct ScanDetailView: View {
             }
         }
 
-        ToolbarItem(placement: .primaryAction) {
-            Button(role: .destructive) {
-                store.delete(documentID)
-                dismiss()
-            } label: {
-                Image(systemName: "trash")
-            }
-        }
     }
 
     // MARK: - Rendering
@@ -243,6 +241,23 @@ struct ScanDetailView: View {
         } catch {
             NSLog("PDF export failed: \(error.localizedDescription)")
         }
+    }
+
+    private func shareCurrentPageAsImage() async {
+        guard let page = currentPage,
+              let original = store.loadImage(for: page, in: documentID) else { return }
+        let mode = page.mode
+        let pageID = page.id.uuidString
+        let title = document?.title ?? "Scan"
+
+        guard let jpeg = await Task.detached(priority: .userInitiated) { () -> Data? in
+            let enhanced = ImageEnhancer.shared.enhance(original, mode: mode, cacheKey: pageID)
+            return enhanced.jpegData(compressionQuality: 0.92)
+        }.value else { return }
+
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("\(title).jpg")
+        try? jpeg.write(to: url, options: .atomic)
+        sharePayload = SharePayload(url: url)
     }
 
     private func saveCurrentPage() async {
