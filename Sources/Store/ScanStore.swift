@@ -57,7 +57,7 @@ final class ScanStore {
 
     /// Saves a freshly captured batch of pages and kicks off OCR in the background.
     @discardableResult
-    func addDocument(images: [UIImage], mode: EnhancementMode = .document) async -> ScanDocument? {
+    func addDocument(images: [UIImage], mode: EnhancementMode = .original) async -> ScanDocument? {
         guard !images.isEmpty else { return nil }
 
         var document = ScanDocument(title: Self.defaultTitle(), pages: [])

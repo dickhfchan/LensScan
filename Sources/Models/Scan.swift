@@ -44,7 +44,7 @@ struct ScanPage: Identifiable, Codable, Hashable, Sendable {
     var imageFile: String
     /// File name of the small preview JPEG inside the document folder.
     var thumbnailFile: String
-    var mode: EnhancementMode = .document
+    var mode: EnhancementMode = .original
     var recognizedText: String = ""
     var textBlocks: [TextBlock] = []
 
