@@ -68,9 +68,9 @@ enum OCRService {
     }
 
     private static func supportedSubset(of wanted: [String]) -> [String] {
-        let supported = (try? VNRecognizeTextRequest.supportedRecognitionLanguages(
-            for: .accurate,
-            revision: VNRecognizeTextRequest.currentRevision)) ?? []
+        let probe = VNRecognizeTextRequest()
+        probe.recognitionLevel = .accurate
+        let supported = (try? probe.supportedRecognitionLanguages()) ?? []
         guard !supported.isEmpty else { return [] }
         return wanted.filter { supported.contains($0) }
     }
