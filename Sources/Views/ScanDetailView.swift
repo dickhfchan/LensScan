@@ -250,15 +250,20 @@ struct ScanDetailView: View {
               let original = store.loadImage(for: page, in: documentID) else { return }
         let mode = page.mode
         let pageID = page.id.uuidString
-        let image = await Task.detached(priority: .userInitiated) { () -> UIImage in
-            ImageEnhancer.shared.enhance(original, mode: mode, cacheKey: pageID)
-        }.value
+
+        // Render and encode to JPEG off the main actor so we pass Sendable Data
+        // into performChanges rather than a potentially GPU-backed UIImage.
+        guard let jpeg = await Task.detached(priority: .userInitiated) { () -> Data? in
+            let enhanced = ImageEnhancer.shared.enhance(original, mode: mode, cacheKey: pageID)
+            return enhanced.jpegData(compressionQuality: 0.92)
+        }.value else { return }
 
         let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
         guard status == .authorized || status == .limited else { return }
         do {
             try await PHPhotoLibrary.shared().performChanges {
-                PHAssetChangeRequest.creationRequestForAsset(from: image)
+                let req = PHAssetCreationRequest.forAsset()
+                req.addResource(with: .photo, data: jpeg, options: nil)
             }
         } catch {
             NSLog("Save to Photos failed: \(error.localizedDescription)")
