@@ -1,4 +1,5 @@
 import SwiftUI
+import Photos
 
 struct ScanDetailView: View {
     /// Stable placeholder selection for the (unreachable) case of a document with no pages.
@@ -153,6 +154,12 @@ struct ScanDetailView: View {
                     Label("Rename", systemImage: "pencil")
                 }
 
+                Button {
+                    Task { await saveCurrentPage() }
+                } label: {
+                    Label("Save Image", systemImage: "square.and.arrow.down")
+                }
+
                 if let page = currentPage, (document?.pages.count ?? 0) > 1 {
                     Button(role: .destructive) {
                         store.deletePage(page.id, in: documentID)
@@ -231,6 +238,26 @@ struct ScanDetailView: View {
             sharePayload = SharePayload(url: url)
         } catch {
             NSLog("PDF export failed: \(error.localizedDescription)")
+        }
+    }
+
+    private func saveCurrentPage() async {
+        guard let page = currentPage,
+              let original = store.loadImage(for: page, in: documentID) else { return }
+        let mode = page.mode
+        let pageID = page.id.uuidString
+        let image = await Task.detached(priority: .userInitiated) { () -> UIImage in
+            ImageEnhancer.shared.enhance(original, mode: mode, cacheKey: pageID)
+        }.value
+
+        let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+        guard status == .authorized || status == .limited else { return }
+        do {
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            }
+        } catch {
+            NSLog("Save to Photos failed: \(error.localizedDescription)")
         }
     }
 

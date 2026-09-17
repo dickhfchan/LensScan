@@ -16,6 +16,7 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_NSCameraUsageDescription: "LensScan uses the camera to scan documents."
+        INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription: "LensScan saves scanned pages to your photo library."
         INFOPLIST_KEY_UIRequiresFullScreen: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
