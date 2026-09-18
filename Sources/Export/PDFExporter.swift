@@ -28,7 +28,7 @@ enum PDFExporter {
         let format = UIGraphicsPDFRendererFormat()
         format.documentInfo = [
             kCGPDFContextTitle as String: title,
-            kCGPDFContextCreator as String: "LensScan"
+            kCGPDFContextCreator as String: "NativeScan"
         ]
 
         let defaultBounds = CGRect(x: 0, y: 0, width: 612, height: 792)
